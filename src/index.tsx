@@ -4,6 +4,7 @@ import { RouterProvider } from 'react-router';
 import { router } from './router';
 import { ConvexReactClient } from 'convex/react';
 import { ConvexAuthProvider } from '@convex-dev/auth/react';
+import './index.css';
 
 const convex = new ConvexReactClient(import.meta.env.PUBLIC_CONVEX_URL);
 
