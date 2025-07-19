@@ -5,11 +5,13 @@
   "type": "module",
   "scripts": {
     "build": "rsbuild build",
-    "dev": "rsbuild dev --open",
+    "dev": "rsbuild dev",
     "format": "prettier --write .",
     "preview": "rsbuild preview"
   },
   "dependencies": {
+    "@auth/core": "0.37.0",
+    "@convex-dev/auth": "^0.0.87",
     "convex": "^1.25.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -21,6 +23,7 @@
     "@tailwindcss/postcss": "^4.1.11",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "jose": "^6.0.12",
     "prettier": "^3.6.2",
     "tailwindcss": "^4.1.11",
     "typescript": "^5.8.3"
