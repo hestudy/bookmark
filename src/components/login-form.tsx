@@ -1,4 +1,3 @@
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -9,11 +8,18 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
+import { useAuthActions } from '@convex-dev/auth/react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
+  const { signIn } = useAuthActions();
+  const [step, setStep] = useState<'signUp' | 'signIn'>('signIn');
+
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card>
@@ -24,44 +30,73 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              const formData = new FormData(event.currentTarget);
+              signIn('password', formData).catch((e) => {
+                toast.error(e.message);
+              });
+            }}
+          >
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  name="email"
+                  placeholder="john@example.com"
                   required
                 />
               </div>
               <div className="grid gap-3">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
                 </div>
-                <Input id="password" type="password" required />
+                <Input
+                  id="password"
+                  type="password"
+                  name="password"
+                  required
+                  placeholder="********"
+                />
               </div>
+              <input name="flow" type="hidden" value={step} />
               <div className="flex flex-col gap-3">
                 <Button type="submit" className="w-full">
-                  Login
-                </Button>
-                <Button variant="neutral" className="w-full">
-                  Login with Google
+                  {step === 'signIn' ? 'Login' : 'Sign up'}
                 </Button>
               </div>
             </div>
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{' '}
-              <a href="#" className="underline underline-offset-4">
-                Sign up
-              </a>
-            </div>
+            {step === 'signIn' && (
+              <div className="mt-4 text-center text-sm">
+                Don&apos;t have an account?{' '}
+                <button
+                  type="button"
+                  className="underline underline-offset-4"
+                  onClick={() => {
+                    setStep('signUp');
+                  }}
+                >
+                  Sign up
+                </button>
+              </div>
+            )}
+            {step === 'signUp' && (
+              <div className="mt-4 text-center text-sm">
+                Already have an account?{' '}
+                <button
+                  type="button"
+                  className="underline underline-offset-4"
+                  onClick={() => {
+                    setStep('signIn');
+                  }}
+                >
+                  Login
+                </button>
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>
