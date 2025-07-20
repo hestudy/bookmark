@@ -16,6 +16,7 @@ import type {
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
 import type * as link from "../link.js";
+import type * as scrapy from "../scrapy.js";
 import type * as user from "../user.js";
 
 /**
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
   link: typeof link;
+  scrapy: typeof scrapy;
   user: typeof user;
 }>;
 export declare const api: FilterApi<
