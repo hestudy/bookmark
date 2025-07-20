@@ -47,12 +47,14 @@ export const updateLink = internalMutation({
     linkId: v.id('links'),
     title: v.optional(v.string()),
     description: v.optional(v.string()),
+    screenshot: v.optional(v.id('_storage')),
   },
   handler: async (ctx, args) => {
-    const { linkId, title, description } = args;
+    const { linkId, title, description, screenshot } = args;
     return await ctx.db.patch(linkId, {
       title,
       description,
+      screenshot,
     });
   },
 });
