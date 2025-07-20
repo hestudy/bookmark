@@ -9,6 +9,7 @@ const schema = defineSchema({
     title: v.optional(v.string()),
     description: v.optional(v.string()),
     userId: v.id('users'),
+    
   }),
 });
 

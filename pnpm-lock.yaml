@@ -17,6 +17,9 @@ importers:
       '@convex-dev/react-query':
         specifier: 0.0.0-alpha.11
         version: 0.0.0-alpha.11(@tanstack/react-query@5.83.0(react@19.1.0))(convex@1.25.4(react@19.1.0))(react@19.1.0)(typescript@5.8.3)(zod@3.25.76)
+      '@convex-dev/workpool':
+        specifier: ^0.2.17
+        version: 0.2.17(convex-helpers@0.1.99(convex@1.25.4(react@19.1.0))(react@19.1.0)(typescript@5.8.3)(zod@3.25.76))(convex@1.25.4(react@19.1.0))
       '@radix-ui/react-avatar':
         specifier: ^1.1.10
         version: 1.1.10(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -186,6 +189,12 @@ packages:
     peerDependencies:
       '@tanstack/react-query': ^5.0.0
       convex: ^1.24.8
+
+  '@convex-dev/workpool@0.2.17':
+    resolution: {integrity: sha512-Z2GjubsieZATdLYip+WTRLQNRmo+Jl9OoeN0GjsgIhLriHrNyddijosgGH656LtdmVs4SdqyqkwvMwabRixakA==}
+    peerDependencies:
+      convex: '>=1.25.0 <1.35.0'
+      convex-helpers: ^0.1.94
 
   '@emnapi/core@0.45.0':
     resolution: {integrity: sha512-DPWjcUDQkCeEM4VnljEOEcXdAD7pp8zSZsgOujk/LGIwCXWbXJngin+MO4zbH429lzeC3WbYLGjE2MaUOwzpyw==}
@@ -2014,6 +2023,11 @@ snapshots:
       - react
       - typescript
       - zod
+
+  '@convex-dev/workpool@0.2.17(convex-helpers@0.1.99(convex@1.25.4(react@19.1.0))(react@19.1.0)(typescript@5.8.3)(zod@3.25.76))(convex@1.25.4(react@19.1.0))':
+    dependencies:
+      convex: 1.25.4(react@19.1.0)
+      convex-helpers: 0.1.99(convex@1.25.4(react@19.1.0))(react@19.1.0)(typescript@5.8.3)(zod@3.25.76)
 
   '@emnapi/core@0.45.0':
     dependencies:

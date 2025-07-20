@@ -19,7 +19,11 @@ export const scrapyUrl = internalAction({
       'meta[name="description"]',
       (element) => element.getAttribute('content'),
     );
+
+    await page.setViewport({ width: 1080, height: 1024 });
+    const screenshot = await page.screenshot({ path: 'screenshot.png' });
+
     await page.close();
-    return { title, description };
+    return { title, description, screenshot };
   },
 });
