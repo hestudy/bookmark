@@ -1,17 +1,23 @@
 import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router';
 import AuthLayout from './layouts/authLayout';
+import SidebarLayout from './layouts/sidebarLayout';
 
 export const router = createBrowserRouter([
   {
     element: <AuthLayout />,
     children: [
       {
-        path: '/',
-        lazy: async () => {
-          const Home = await lazy(() => import('./pages/home'));
-          return { Component: Home };
-        },
+        element: <SidebarLayout />,
+        children: [
+          {
+            path: '/',
+            lazy: async () => {
+              const Home = await lazy(() => import('./pages/home'));
+              return { Component: Home };
+            },
+          },
+        ],
       },
     ],
   },
