@@ -13,7 +13,7 @@ export const router = createBrowserRouter([
           {
             path: '/',
             lazy: async () => {
-              const Home = await lazy(() => import('./pages/home'));
+              const Home = lazy(() => import('./pages/home'));
               return { Component: Home };
             },
           },

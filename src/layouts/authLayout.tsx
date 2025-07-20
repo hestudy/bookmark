@@ -6,7 +6,9 @@ import { Outlet } from 'react-router';
 const AuthLayout = memo(() => {
   return (
     <>
-      <AuthLoading>loading</AuthLoading>
+      <AuthLoading>
+        <div>loading</div>
+      </AuthLoading>
       <Unauthenticated>
         <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
           <div className="w-full max-w-sm">
