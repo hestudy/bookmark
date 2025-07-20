@@ -20,8 +20,11 @@ export const scrapyUrl = internalAction({
       (element) => element.getAttribute('content'),
     );
 
-    await page.setViewport({ width: 1080, height: 1024 });
-    const screenshot = await page.screenshot({ path: 'screenshot.png' });
+    const screenshot = await page.screenshot({
+      path: 'screenshot.png',
+      encoding: 'base64',
+      fullPage: true,
+    });
 
     await page.close();
     return { title, description, screenshot };

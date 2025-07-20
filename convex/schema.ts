@@ -10,6 +10,7 @@ const schema = defineSchema({
     description: v.optional(v.string()),
     userId: v.id('users'),
     screenshot: v.optional(v.id('_storage')),
+    poolId: v.optional(v.string()),
   }),
 });
 
