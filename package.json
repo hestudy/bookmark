@@ -7,7 +7,8 @@
     "build": "rsbuild build",
     "dev": "rsbuild dev",
     "format": "prettier --write .",
-    "preview": "rsbuild preview"
+    "preview": "rsbuild preview",
+    "dev-convex": "convex dev"
   },
   "dependencies": {
     "@auth/core": "0.37.0",
@@ -59,6 +60,8 @@
     "jose": "^6.0.12",
     "prettier": "^3.6.2",
     "tailwindcss": "^4.1.11",
+    "turbo": "^2.5.5",
     "typescript": "^5.8.3"
-  }
+  },
+  "packageManager": "pnpm@10.0.0"
 }
