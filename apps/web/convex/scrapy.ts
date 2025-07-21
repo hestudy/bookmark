@@ -3,6 +3,10 @@
 import { v } from 'convex/values';
 import puppeteer from 'puppeteer-core';
 import { internalAction } from './_generated/server';
+import { hc } from 'hono/client';
+import type { BookmarkFunction } from '../../function/src/index';
+
+const client = hc<BookmarkFunction>('/');
 
 export const scrapyUrl = internalAction({
   args: {
