@@ -23,5 +23,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "convex"]
+  "include": ["src", "convex", "function"]
 }
