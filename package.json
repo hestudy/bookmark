@@ -7,8 +7,7 @@
     "build": "rsbuild build",
     "dev": "rsbuild dev",
     "format": "prettier --write .",
-    "preview": "rsbuild preview",
-    "dev-convex": "convex dev"
+    "preview": "rsbuild preview"
   },
   "dependencies": {
     "@auth/core": "0.37.0",
