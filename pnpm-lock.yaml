@@ -99,6 +99,9 @@ importers:
       defuddle:
         specifier: ^0.6.4
         version: 0.6.4(jsdom@24.1.3)
+      function:
+        specifier: workspace:*
+        version: link:../function
       hono:
         specifier: ^4.8.5
         version: 4.8.5

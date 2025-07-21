@@ -3,7 +3,7 @@ import { Hono } from "hono";
 
 const app = new Hono();
 
-app.get("/", (c) => {
+const router = app.get("/", (c) => {
   return c.text("Hello Hono!");
 });
 
@@ -17,4 +17,4 @@ serve(
   }
 );
 
-export type BookmarkFunction = typeof app;
+export type BookmarkFunction = typeof router;

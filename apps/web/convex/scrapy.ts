@@ -1,12 +1,14 @@
 'use node';
 
 import { v } from 'convex/values';
+import { BookmarkFunction } from 'function';
+import { hc } from 'hono/client';
 import puppeteer from 'puppeteer-core';
 import { internalAction } from './_generated/server';
-import { hc } from 'hono/client';
-import type { BookmarkFunction } from '../../function/src/index';
 
-const client = hc<BookmarkFunction>('/');
+const client = hc<BookmarkFunction>(
+  process.env.FUNCTION_URL || 'http://localhost:3001',
+);
 
 export const scrapyUrl = internalAction({
   args: {
