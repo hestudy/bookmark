@@ -36,3 +36,19 @@ export const scrapyUrl = internalAction({
     return { title, description, screenshot };
   },
 });
+
+export const newScrapyUrl = internalAction({
+  args: {
+    url: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const res = await client.posts.$post({
+      json: {
+        url: args.url,
+      },
+    });
+    const json = await res.json();
+
+    return json;
+  },
+});
