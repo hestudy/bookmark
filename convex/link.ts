@@ -14,18 +14,35 @@ const pool = new Workpool(components.scrapeWorkpool, { maxParallelism: 1 });
 
 export const getLinkPage = query({
   args: {
-    pagination: paginationOptsValidator,
+    paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
       throw new Error('Not authenticated');
     }
-    return await ctx.db
+
+    const links = await ctx.db
       .query('links')
       .filter((q) => q.eq(q.field('userId'), userId))
       .order('desc')
-      .paginate(args.pagination);
+      .paginate(args.paginationOpts);
+
+    const linksWithScreenshot = await Promise.all(
+      links.page.map(async (link) => {
+        return {
+          ...link,
+          screenshotUrl: link.screenshot
+            ? await ctx.storage.getUrl(link.screenshot)
+            : undefined,
+        };
+      }),
+    );
+
+    return {
+      ...links,
+      page: linksWithScreenshot,
+    };
   },
 });
 

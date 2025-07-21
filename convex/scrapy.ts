@@ -3,6 +3,7 @@
 import { v } from 'convex/values';
 import puppeteer from 'puppeteer-core';
 import { internalAction } from './_generated/server';
+import { Defuddle } from 'defuddle/node';
 
 export const scrapyUrl = internalAction({
   args: {
@@ -28,5 +29,17 @@ export const scrapyUrl = internalAction({
 
     await page.close();
     return { title, description, screenshot };
+  },
+});
+
+export const scrapyMeta = internalAction({
+  args: {
+    url: v.string(),
+  },
+  handler: async (_, args) => {
+    const res = await fetch(args.url);
+    const html = await res.text();
+    const result = await Defuddle(html);
+    return result;
   },
 });

@@ -11,7 +11,13 @@ const schema = defineSchema({
     userId: v.id('users'),
     screenshot: v.optional(v.id('_storage')),
     poolId: v.optional(v.string()),
-  }),
+  })
+    .searchIndex('search_title', {
+      searchField: 'title',
+    })
+    .searchIndex('search_description', {
+      searchField: 'description',
+    }),
 });
 
 export default schema;
