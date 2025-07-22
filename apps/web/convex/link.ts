@@ -173,19 +173,10 @@ export const getLinkMetaData = internalAction({
   handler: async (ctx, args) => {
     const { linkId, url } = args;
     const res = await ctx.runAction(internal.scrapy.scrapyUrl, { url });
-    const screenshotId = await ctx.storage.store(
-      new Blob(
-        [Uint8Array.from(atob(res.screenshot), (c) => c.charCodeAt(0))],
-        {
-          type: 'image/png',
-        },
-      ),
-    );
     await ctx.runMutation(internal.link.updateLink, {
       linkId,
       title: res.title,
       description: res.description!,
-      screenshot: screenshotId,
     });
   },
 });

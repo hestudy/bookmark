@@ -1,33 +1,10 @@
 import { serve } from "@hono/node-server";
-import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
-import z from "zod";
-import { JSDOM } from "jsdom";
-import { Defuddle } from "defuddle/node";
+import scrapy from "./scrapy.js";
 
 const app = new Hono();
 
-app.get("/", (c) => {
-  return c.text("Hello Hono!");
-});
-
-const router = app.post(
-  "/posts",
-  zValidator(
-    "json",
-    z.object({
-      url: z.url(),
-    })
-  ),
-  async (c) => {
-    const validated = c.req.valid("json");
-    const dom = await JSDOM.fromURL(validated.url);
-    const result = await Defuddle(dom, validated.url, {
-      markdown: true,
-    });
-    return c.json(result);
-  }
-);
+const router = app.route("/scrapy", scrapy);
 
 serve(
   {
