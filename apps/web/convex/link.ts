@@ -28,17 +28,24 @@ export const getLinkPage = query({
       .order('desc')
       .paginate(args.paginationOpts);
 
-    const linksWithScreenshot = await Promise.all(
+    const linksWithMedia = await Promise.all(
       links.page.map(async (link) => {
+        const { content, html, ...props } = link;
         return {
-          ...link,
+          ...props,
+          imageUrl: link.image
+            ? await ctx.storage.getUrl(link.image)
+            : undefined,
+          faviconUrl: link.favicon
+            ? await ctx.storage.getUrl(link.favicon)
+            : undefined,
         };
       }),
     );
 
     return {
       ...links,
-      page: linksWithScreenshot,
+      page: linksWithMedia,
     };
   },
 });
@@ -105,6 +112,93 @@ export const addLink = mutation({
   },
 });
 
+export const internalUpdateLink = internalMutation({
+  args: {
+    linkId: v.id('links'),
+    title: v.optional(v.string()),
+    description: v.optional(v.string()),
+    domain: v.optional(v.string()),
+    content: v.optional(v.string()),
+    html: v.optional(v.string()),
+    favicon: v.optional(v.id('_storage')),
+    image: v.optional(v.id('_storage')),
+  },
+  handler: async (ctx, args) => {
+    const {
+      linkId,
+      title,
+      description,
+      domain,
+      content,
+      html,
+      favicon,
+      image,
+    } = args;
+    return await ctx.db.patch(linkId, {
+      title,
+      description,
+      domain,
+      content,
+      html,
+      favicon,
+      image,
+    });
+  },
+});
+
+export const deleteLink = mutation({
+  args: {
+    linkId: v.id('links'),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error('Not authenticated');
+    }
+
+    const link = await ctx.db
+      .query('links')
+      .filter((q) => q.eq(q.field('_id'), args.linkId))
+      .filter((q) => q.eq(q.field('userId'), userId))
+      .first();
+
+    if (!link) {
+      throw new Error('Link not found');
+    }
+
+    return await ctx.db.delete(args.linkId);
+  },
+});
+
+export const updateLink = mutation({
+  args: {
+    linkId: v.id('links'),
+    title: v.optional(v.string()),
+    description: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error('Not authenticated');
+    }
+
+    const link = await ctx.db
+      .query('links')
+      .filter((q) => q.eq(q.field('_id'), args.linkId))
+      .filter((q) => q.eq(q.field('userId'), userId))
+      .first();
+
+    if (!link) {
+      throw new Error('Link not found');
+    }
+
+    return await ctx.db.patch(args.linkId, {
+      title: args.title,
+      description: args.description,
+    });
+  },
+});
+
 export const scrapyLink = mutation({
   args: {
     linkId: v.id('links'),
@@ -142,27 +236,6 @@ export const scrapyLink = mutation({
   },
 });
 
-export const updateLink = internalMutation({
-  args: {
-    linkId: v.id('links'),
-    title: v.optional(v.string()),
-    description: v.optional(v.string()),
-    domain: v.optional(v.string()),
-    content: v.optional(v.string()),
-    html: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const { linkId, title, description, domain, content, html } = args;
-    return await ctx.db.patch(linkId, {
-      title,
-      description,
-      domain,
-      content,
-      html,
-    });
-  },
-});
-
 export const getLinkMetaData = internalAction({
   args: {
     linkId: v.id('links'),
@@ -171,10 +244,26 @@ export const getLinkMetaData = internalAction({
   handler: async (ctx, args) => {
     const { linkId, url } = args;
     const res = await ctx.runAction(internal.scrapy.scrapyUrl, { url });
-    await ctx.runMutation(internal.link.updateLink, {
+    const faviconId = res.favicon
+      ? await ctx.runAction(internal.media.downloadAndUploadMedia, {
+          url: res.favicon,
+        })
+      : undefined;
+    const imageId = res.image
+      ? await ctx.runAction(internal.media.downloadAndUploadMedia, {
+          url: res.image,
+        })
+      : undefined;
+
+    await ctx.runMutation(internal.link.internalUpdateLink, {
       linkId,
       title: res.title,
       description: res.description!,
+      domain: res.domain,
+      content: res.contentMarkdown,
+      html: res.content,
+      favicon: faviconId || undefined,
+      image: imageId || undefined,
     });
   },
 });

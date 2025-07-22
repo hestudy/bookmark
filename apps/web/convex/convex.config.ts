@@ -4,4 +4,5 @@ import { defineApp } from 'convex/server';
 
 const app = defineApp();
 app.use(workpool, { name: 'scrapeWorkpool' });
+app.use(workpool, { name: 'mediaWorkpool' });
 export default app;
