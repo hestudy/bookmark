@@ -32,9 +32,6 @@ export const getLinkPage = query({
       links.page.map(async (link) => {
         return {
           ...link,
-          screenshotUrl: link.screenshot
-            ? await ctx.storage.getUrl(link.screenshot)
-            : undefined,
         };
       }),
     );
@@ -64,9 +61,6 @@ export const getLink = query({
 
     return {
       ...result,
-      screenshotUrl: result?.screenshot
-        ? await ctx.storage.getUrl(result.screenshot)
-        : undefined,
     };
   },
 });
@@ -153,14 +147,18 @@ export const updateLink = internalMutation({
     linkId: v.id('links'),
     title: v.optional(v.string()),
     description: v.optional(v.string()),
-    screenshot: v.optional(v.id('_storage')),
+    domain: v.optional(v.string()),
+    content: v.optional(v.string()),
+    html: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { linkId, title, description, screenshot } = args;
+    const { linkId, title, description, domain, content, html } = args;
     return await ctx.db.patch(linkId, {
       title,
       description,
-      screenshot,
+      domain,
+      content,
+      html,
     });
   },
 });

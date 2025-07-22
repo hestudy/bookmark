@@ -6,10 +6,14 @@ const schema = defineSchema({
   ...authTables,
   links: defineTable({
     url: v.string(),
+    domain: v.optional(v.string()),
     title: v.optional(v.string()),
     description: v.optional(v.string()),
+    content: v.optional(v.string()),
+    html: v.optional(v.string()),
+    image: v.optional(v.id('_storage')),
+    favicon: v.optional(v.id('_storage')),
     userId: v.id('users'),
-    screenshot: v.optional(v.id('_storage')),
     poolId: v.optional(v.string()),
   })
     .searchIndex('search_title', {
