@@ -22,7 +22,10 @@ const router = app.post(
   async (c) => {
     const validated = c.req.valid("json");
     const dom = await JSDOM.fromURL(validated.url);
-    const result = await Defuddle(dom);
+    const result = await Defuddle(dom, validated.url, {
+      debug: true,
+      markdown: true,
+    });
     return c.json(result);
   }
 );
