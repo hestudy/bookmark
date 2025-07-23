@@ -1,11 +1,6 @@
 import { v } from 'convex/values';
-import { BookmarkFunction } from 'function';
-import { hc } from 'hono/client';
 import { internalAction } from './_generated/server';
-
-const client = hc<BookmarkFunction>(
-  process.env.FUNCTION_URL || 'http://localhost:3001',
-);
+import { client } from './utils/client';
 
 export const scrapyUrl = internalAction({
   args: {

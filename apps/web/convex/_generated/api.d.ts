@@ -14,6 +14,7 @@ import type * as link from "../link.js";
 import type * as media from "../media.js";
 import type * as scrapy from "../scrapy.js";
 import type * as user from "../user.js";
+import type * as utils_client from "../utils/client.js";
 
 import type {
   ApiFromModules,
@@ -36,6 +37,7 @@ declare const fullApi: ApiFromModules<{
   media: typeof media;
   scrapy: typeof scrapy;
   user: typeof user;
+  "utils/client": typeof utils_client;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

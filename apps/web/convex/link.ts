@@ -112,40 +112,6 @@ export const addLink = mutation({
   },
 });
 
-export const internalUpdateLink = internalMutation({
-  args: {
-    linkId: v.id('links'),
-    title: v.optional(v.string()),
-    description: v.optional(v.string()),
-    domain: v.optional(v.string()),
-    content: v.optional(v.string()),
-    html: v.optional(v.string()),
-    favicon: v.optional(v.id('_storage')),
-    image: v.optional(v.id('_storage')),
-  },
-  handler: async (ctx, args) => {
-    const {
-      linkId,
-      title,
-      description,
-      domain,
-      content,
-      html,
-      favicon,
-      image,
-    } = args;
-    return await ctx.db.patch(linkId, {
-      title,
-      description,
-      domain,
-      content,
-      html,
-      favicon,
-      image,
-    });
-  },
-});
-
 export const deleteLink = mutation({
   args: {
     linkId: v.id('links'),
@@ -236,6 +202,40 @@ export const scrapyLink = mutation({
   },
 });
 
+export const internalUpdateLink = internalMutation({
+  args: {
+    linkId: v.id('links'),
+    title: v.optional(v.string()),
+    description: v.optional(v.string()),
+    domain: v.optional(v.string()),
+    content: v.optional(v.string()),
+    html: v.optional(v.string()),
+    favicon: v.optional(v.id('_storage')),
+    image: v.optional(v.id('_storage')),
+  },
+  handler: async (ctx, args) => {
+    const {
+      linkId,
+      title,
+      description,
+      domain,
+      content,
+      html,
+      favicon,
+      image,
+    } = args;
+    return await ctx.db.patch(linkId, {
+      title,
+      description,
+      domain,
+      content,
+      html,
+      favicon,
+      image,
+    });
+  },
+});
+
 export const getLinkMetaData = internalAction({
   args: {
     linkId: v.id('links'),
@@ -244,6 +244,7 @@ export const getLinkMetaData = internalAction({
   handler: async (ctx, args) => {
     const { linkId, url } = args;
     const res = await ctx.runAction(internal.scrapy.scrapyUrl, { url });
+    console.log(res);
     const faviconId = res.favicon
       ? await ctx.runAction(internal.media.downloadAndUploadMedia, {
           url: res.favicon,
