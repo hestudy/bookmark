@@ -10,18 +10,16 @@ const schema = defineSchema({
     title: v.optional(v.string()),
     description: v.optional(v.string()),
     content: v.optional(v.string()),
+    textContent: v.optional(v.string()),
     html: v.optional(v.string()),
     image: v.optional(v.id('_storage')),
     favicon: v.optional(v.id('_storage')),
     userId: v.id('users'),
     poolId: v.optional(v.string()),
-  })
-    .searchIndex('search_title', {
-      searchField: 'title',
-    })
-    .searchIndex('search_description', {
-      searchField: 'description',
-    }),
+  }).searchIndex('search_textContent', {
+    searchField: 'textContent',
+    filterFields: ['userId'],
+  }),
 });
 
 export default schema;

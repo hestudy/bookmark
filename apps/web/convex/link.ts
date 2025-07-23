@@ -72,6 +72,32 @@ export const getLink = query({
   },
 });
 
+export const searchLink = query({
+  args: {
+    keyword: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error('Not authenticated');
+    }
+
+    const result = await ctx.db
+      .query('links')
+      .withSearchIndex('search_textContent', (q) =>
+        q.search('textContent', args.keyword).eq('userId', userId),
+      )
+      .take(100);
+
+    return result.map((item) => {
+      const { content, html, textContent, ...props } = item;
+      return {
+        ...props,
+      };
+    });
+  },
+});
+
 export const addLink = mutation({
   args: {
     url: v.string(),
@@ -212,6 +238,7 @@ export const internalUpdateLink = internalMutation({
     html: v.optional(v.string()),
     favicon: v.optional(v.id('_storage')),
     image: v.optional(v.id('_storage')),
+    textContent: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const {
@@ -223,6 +250,7 @@ export const internalUpdateLink = internalMutation({
       html,
       favicon,
       image,
+      textContent,
     } = args;
     return await ctx.db.patch(linkId, {
       title,
@@ -232,6 +260,7 @@ export const internalUpdateLink = internalMutation({
       html,
       favicon,
       image,
+      textContent,
     });
   },
 });
@@ -264,6 +293,7 @@ export const getLinkMetaData = internalAction({
       html: res.article?.content || undefined,
       favicon: faviconId || undefined,
       image: imageId || undefined,
+      textContent: res.article?.textContent || undefined,
     });
   },
 });
