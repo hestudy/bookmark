@@ -14,7 +14,6 @@ export const downloadAndUploadMedia = internalAction({
     });
     const blob = await res.blob();
     const mediaId = await ctx.storage.store(blob);
-    console.log(mediaId);
     return mediaId;
   },
 });

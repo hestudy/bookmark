@@ -244,7 +244,6 @@ export const getLinkMetaData = internalAction({
   handler: async (ctx, args) => {
     const { linkId, url } = args;
     const res = await ctx.runAction(internal.scrapy.scrapyUrl, { url });
-    console.log(res);
     const faviconId = res.favicon
       ? await ctx.runAction(internal.media.downloadAndUploadMedia, {
           url: res.favicon,
