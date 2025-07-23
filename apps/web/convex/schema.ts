@@ -4,6 +4,10 @@ import { v } from 'convex/values';
 
 const schema = defineSchema({
   ...authTables,
+  tags: defineTable({
+    name: v.string(),
+    userId: v.id('users'),
+  }),
   links: defineTable({
     url: v.string(),
     domain: v.optional(v.string()),
@@ -16,9 +20,7 @@ const schema = defineSchema({
     favicon: v.optional(v.id('_storage')),
     userId: v.id('users'),
     poolId: v.optional(v.string()),
-  }).searchIndex('search_textContent', {
-    searchField: 'textContent',
-    filterFields: ['userId'],
+    tagIds: v.optional(v.array(v.id('tags'))),
   }),
 });
 

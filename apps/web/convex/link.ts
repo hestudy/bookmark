@@ -1,16 +1,15 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
-import { Workpool } from '@convex-dev/workpool';
 import { paginationOptsValidator } from 'convex/server';
 import { v } from 'convex/values';
-import { components, internal } from './_generated/api';
+import { internal } from './_generated/api';
 import {
+  action,
   internalAction,
   internalMutation,
   mutation,
   query,
 } from './_generated/server';
-
-const pool = new Workpool(components.scrapeWorkpool, { maxParallelism: 1 });
+import { mediaWorkpool, scrapeWorkpool } from './utils/workpool';
 
 export const getLinkPage = query({
   args: {
@@ -72,32 +71,6 @@ export const getLink = query({
   },
 });
 
-export const searchLink = query({
-  args: {
-    keyword: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error('Not authenticated');
-    }
-
-    const result = await ctx.db
-      .query('links')
-      .withSearchIndex('search_textContent', (q) =>
-        q.search('textContent', args.keyword).eq('userId', userId),
-      )
-      .take(100);
-
-    return result.map((item) => {
-      const { content, html, textContent, ...props } = item;
-      return {
-        ...props,
-      };
-    });
-  },
-});
-
 export const addLink = mutation({
   args: {
     url: v.string(),
@@ -121,7 +94,7 @@ export const addLink = mutation({
       userId,
     });
 
-    const poolId = await pool.enqueueAction(
+    const poolId = await scrapeWorkpool.enqueueAction(
       ctx,
       internal.link.getLinkMetaData,
       {
@@ -211,7 +184,7 @@ export const scrapyLink = mutation({
       throw new Error('Link not found');
     }
 
-    const poolId = await pool.enqueueAction(
+    const poolId = await scrapeWorkpool.enqueueAction(
       ctx,
       internal.link.getLinkMetaData,
       {
@@ -236,30 +209,17 @@ export const internalUpdateLink = internalMutation({
     domain: v.optional(v.string()),
     content: v.optional(v.string()),
     html: v.optional(v.string()),
-    favicon: v.optional(v.id('_storage')),
-    image: v.optional(v.id('_storage')),
     textContent: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const {
-      linkId,
-      title,
-      description,
-      domain,
-      content,
-      html,
-      favicon,
-      image,
-      textContent,
-    } = args;
+    const { linkId, title, description, domain, content, html, textContent } =
+      args;
     return await ctx.db.patch(linkId, {
       title,
       description,
       domain,
       content,
       html,
-      favicon,
-      image,
       textContent,
     });
   },
@@ -273,16 +233,20 @@ export const getLinkMetaData = internalAction({
   handler: async (ctx, args) => {
     const { linkId, url } = args;
     const res = await ctx.runAction(internal.scrapy.scrapyUrl, { url });
-    const faviconId = res.favicon
-      ? await ctx.runAction(internal.media.downloadAndUploadMedia, {
-          url: res.favicon,
-        })
-      : undefined;
-    const imageId = res.image
-      ? await ctx.runAction(internal.media.downloadAndUploadMedia, {
-          url: res.image,
-        })
-      : undefined;
+
+    if (res.image) {
+      await mediaWorkpool.enqueueAction(ctx, internal.media.saveLinkImage, {
+        linkId,
+        url: res.image,
+      });
+    }
+
+    if (res.favicon) {
+      await mediaWorkpool.enqueueAction(ctx, internal.media.saveLinkFavicon, {
+        linkId,
+        url: res.favicon,
+      });
+    }
 
     await ctx.runMutation(internal.link.internalUpdateLink, {
       linkId,
@@ -291,8 +255,6 @@ export const getLinkMetaData = internalAction({
       domain: res.domain,
       content: res.contentMarkdown,
       html: res.article?.content || undefined,
-      favicon: faviconId || undefined,
-      image: imageId || undefined,
       textContent: res.article?.textContent || undefined,
     });
   },
