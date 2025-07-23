@@ -1,7 +1,7 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { paginationOptsValidator } from 'convex/server';
 import { v } from 'convex/values';
-import { internal } from './_generated/api';
+import { api, internal } from './_generated/api';
 import {
   action,
   internalAction,
@@ -9,7 +9,11 @@ import {
   mutation,
   query,
 } from './_generated/server';
-import { mediaWorkpool, scrapeWorkpool } from './utils/workpool';
+import {
+  mediaWorkpool,
+  scrapeWorkpool,
+  searchIndexWorkpool,
+} from './utils/workpool';
 
 export const getLinkPage = query({
   args: {
@@ -214,6 +218,14 @@ export const internalUpdateLink = internalMutation({
   handler: async (ctx, args) => {
     const { linkId, title, description, domain, content, html, textContent } =
       args;
+
+    await searchIndexWorkpool.enqueueAction(ctx, internal.search.addDocument, {
+      linkId,
+      title,
+      description,
+      content,
+    });
+
     return await ctx.db.patch(linkId, {
       title,
       description,
@@ -251,11 +263,22 @@ export const getLinkMetaData = internalAction({
     await ctx.runMutation(internal.link.internalUpdateLink, {
       linkId,
       title: res.title,
-      description: res.description!,
+      description: res.description,
       domain: res.domain,
       content: res.contentMarkdown,
       html: res.article?.content || undefined,
       textContent: res.article?.textContent || undefined,
     });
+  },
+});
+
+export const scrapyAllLink = mutation({
+  handler: async (ctx) => {
+    const links = await ctx.db.query('links');
+    for await (const link of links) {
+      await scrapeWorkpool.enqueueMutation(ctx, api.link.scrapyLink, {
+        linkId: link._id,
+      });
+    }
   },
 });
