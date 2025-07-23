@@ -1,4 +1,5 @@
 import AddLinkFormPopover from '@/components/link-form/add-link-form/add-link-form-popover';
+import LinkDetailSheet from '@/components/link-form/link-detail/link-detail-sheet';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import {
@@ -97,9 +98,11 @@ const Home = memo(() => {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button size={'icon'} variant={'neutral'}>
-                        <Scan />
-                      </Button>
+                      <LinkDetailSheet id={item._id}>
+                        <Button size={'icon'} variant={'neutral'}>
+                          <Scan />
+                        </Button>
+                      </LinkDetailSheet>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button size={'icon'} variant={'neutral'}>

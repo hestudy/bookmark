@@ -1,7 +1,9 @@
 import { zValidator } from "@hono/zod-validator";
+import { Readability } from "@mozilla/readability";
 import { Defuddle } from "defuddle/node";
 import { Hono } from "hono";
 import { stream } from "hono/streaming";
+import { JSDOM } from "jsdom";
 import puppeteer from "puppeteer-core";
 import z from "zod";
 
@@ -16,20 +18,30 @@ const scrapy = new Hono()
     ),
     async (c) => {
       const validated = c.req.valid("json");
+
       const browser = await puppeteer.connect({
         browserWSEndpoint: process.env.BROWSERWSENDPOINT,
       });
       const page = await browser.newPage();
       await page.goto(validated.url);
 
-      const dom = await page.evaluate(() => {
+      const html = await page.evaluate(() => {
         return document.documentElement.outerHTML;
       });
+
+      const dom = await new JSDOM(html);
 
       const result = await Defuddle(dom, undefined, {
         separateMarkdown: true,
       });
-      return c.json(result);
+
+      const reader = new Readability(dom.window.document);
+      const article = reader.parse();
+
+      return c.json({
+        ...result,
+        article,
+      });
     }
   )
   .get(

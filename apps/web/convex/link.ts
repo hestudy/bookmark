@@ -261,7 +261,7 @@ export const getLinkMetaData = internalAction({
       description: res.description!,
       domain: res.domain,
       content: res.contentMarkdown,
-      html: res.content,
+      html: res.article?.content || undefined,
       favicon: faviconId || undefined,
       image: imageId || undefined,
     });
