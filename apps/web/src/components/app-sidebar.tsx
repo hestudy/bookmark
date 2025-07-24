@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronsUpDown, Home, LogOut } from 'lucide-react';
+import { ChevronsUpDown, Home, LogOut, Search } from 'lucide-react';
 
 import * as React from 'react';
 
@@ -30,14 +30,7 @@ import { api } from 'convex/_generated/api';
 import { useQuery } from 'convex/react';
 import { Link, useLocation } from 'react-router';
 import { useAuthActions } from '@convex-dev/auth/react';
-
-const navMenu = [
-  {
-    title: 'Home',
-    icon: Home,
-    path: '/',
-  },
-];
+import { navMenu } from './navMenu';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { isMobile } = useSidebar();

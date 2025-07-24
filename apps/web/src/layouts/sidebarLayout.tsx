@@ -1,4 +1,5 @@
 import { AppSidebar } from '@/components/app-sidebar';
+import { navMenu } from '@/components/navMenu';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,10 +13,17 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
-import { memo } from 'react';
-import { Outlet } from 'react-router';
+import { memo, useMemo } from 'react';
+import { Outlet, useMatches } from 'react-router';
 
 const SidebarLayout = memo(() => {
+  const matches = useMatches();
+
+  const breadcrumb = useMemo(() => {
+    const lastMatch = matches[matches.length - 1];
+    return navMenu.find((item) => item.path === lastMatch.pathname)?.title;
+  }, [matches[matches.length - 1]]);
+
   return (
     <SidebarProvider className="w-screen h-screen overflow-hidden">
       <AppSidebar />
@@ -30,7 +38,7 @@ const SidebarLayout = memo(() => {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Home</BreadcrumbPage>
+                  <BreadcrumbPage>{breadcrumb}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>

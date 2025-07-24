@@ -341,8 +341,21 @@ export const getMoreLink = internalQuery({
   },
   handler: async (ctx, args) => {
     const links = await Promise.all(
-      args.linkIds.map(async (linkId) => await ctx.db.get(linkId)),
+      args.linkIds.map(async (linkId) => {
+        const record = await ctx.db.get(linkId);
+
+        return {
+          ...record!,
+          imageUrl: record?.image
+            ? await ctx.storage.getUrl(record.image)
+            : undefined,
+          faviconUrl: record?.favicon
+            ? await ctx.storage.getUrl(record.favicon)
+            : undefined,
+        };
+      }),
     );
+
     return links;
   },
 });

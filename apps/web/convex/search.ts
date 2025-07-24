@@ -71,12 +71,15 @@ export const searchLinks = action({
       filter: `userId = ${userId.toString()}`,
     });
 
-    const links: (Doc<'links'> | null)[] = await ctx.runQuery(
-      internal.link.getMoreLink,
-      {
-        linkIds: res.hits.map((hit) => hit.id),
-      },
-    );
+    const links: (
+      | (Doc<'links'> & {
+          imageUrl: string | undefined | null;
+          faviconUrl: string | undefined | null;
+        })
+      | null
+    )[] = await ctx.runQuery(internal.link.getMoreLink, {
+      linkIds: res.hits.map((hit) => hit.id),
+    });
 
     return links.map((d) => {
       const { content, html, textContent, ...props } = d!;
