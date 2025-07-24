@@ -1,11 +1,11 @@
 import { getAuthUserId } from '@convex-dev/auth/server';
 import { paginationOptsValidator } from 'convex/server';
 import { v } from 'convex/values';
-import { api, internal } from './_generated/api';
+import { internal } from './_generated/api';
 import {
-  action,
   internalAction,
   internalMutation,
+  internalQuery,
   mutation,
   query,
 } from './_generated/server';
@@ -104,6 +104,7 @@ export const addLink = mutation({
       {
         linkId,
         url: args.url,
+        userId,
       },
     );
 
@@ -134,6 +135,14 @@ export const deleteLink = mutation({
     if (!link) {
       throw new Error('Link not found');
     }
+
+    await searchIndexWorkpool.enqueueAction(
+      ctx,
+      internal.search.deleteDocument,
+      {
+        linkId: args.linkId,
+      },
+    );
 
     return await ctx.db.delete(args.linkId);
   },
@@ -178,10 +187,27 @@ export const scrapyLink = mutation({
       throw new Error('Not authenticated');
     }
 
+    await scrapeWorkpool.enqueueMutation(
+      ctx,
+      internal.link.internalScrapyLink,
+      {
+        linkId: args.linkId,
+        userId,
+      },
+    );
+  },
+});
+
+export const internalScrapyLink = internalMutation({
+  args: {
+    linkId: v.id('links'),
+    userId: v.id('users'),
+  },
+  handler: async (ctx, args) => {
     const link = await ctx.db
       .query('links')
       .filter((q) => q.eq(q.field('_id'), args.linkId))
-      .filter((q) => q.eq(q.field('userId'), userId))
+      .filter((q) => q.eq(q.field('userId'), args.userId))
       .first();
 
     if (!link) {
@@ -194,6 +220,7 @@ export const scrapyLink = mutation({
       {
         linkId: args.linkId,
         url: link.url,
+        userId: args.userId,
       },
     );
 
@@ -214,16 +241,26 @@ export const internalUpdateLink = internalMutation({
     content: v.optional(v.string()),
     html: v.optional(v.string()),
     textContent: v.optional(v.string()),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
-    const { linkId, title, description, domain, content, html, textContent } =
-      args;
+    const {
+      linkId,
+      title,
+      description,
+      domain,
+      content,
+      html,
+      textContent,
+      userId,
+    } = args;
 
     await searchIndexWorkpool.enqueueAction(ctx, internal.search.addDocument, {
       linkId,
       title,
       description,
       content,
+      userId,
     });
 
     return await ctx.db.patch(linkId, {
@@ -241,6 +278,7 @@ export const getLinkMetaData = internalAction({
   args: {
     linkId: v.id('links'),
     url: v.string(),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const { linkId, url } = args;
@@ -268,17 +306,43 @@ export const getLinkMetaData = internalAction({
       content: res.contentMarkdown,
       html: res.article?.content || undefined,
       textContent: res.article?.textContent || undefined,
+      userId: args.userId,
     });
   },
 });
 
 export const scrapyAllLink = mutation({
   handler: async (ctx) => {
-    const links = await ctx.db.query('links');
-    for await (const link of links) {
-      await scrapeWorkpool.enqueueMutation(ctx, api.link.scrapyLink, {
-        linkId: link._id,
-      });
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error('Not authenticated');
     }
+
+    const links = await ctx.db
+      .query('links')
+      .filter((q) => q.eq(q.field('userId'), userId));
+
+    for await (const link of links) {
+      await scrapeWorkpool.enqueueMutation(
+        ctx,
+        internal.link.internalScrapyLink,
+        {
+          linkId: link._id,
+          userId,
+        },
+      );
+    }
+  },
+});
+
+export const getMoreLink = internalQuery({
+  args: {
+    linkIds: v.array(v.id('links')),
+  },
+  handler: async (ctx, args) => {
+    const links = await Promise.all(
+      args.linkIds.map(async (linkId) => await ctx.db.get(linkId)),
+    );
+    return links;
   },
 });
