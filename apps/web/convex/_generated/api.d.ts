@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as file from "../file.js";
 import type * as http from "../http.js";
 import type * as link from "../link.js";
 import type * as media from "../media.js";
@@ -35,6 +36,7 @@ import type {
  */
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  file: typeof file;
   http: typeof http;
   link: typeof link;
   media: typeof media;
