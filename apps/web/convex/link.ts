@@ -78,10 +78,11 @@ export const getLink = query({
 export const addLink = mutation({
   args: {
     url: v.string(),
+    userId: v.optional(v.id('users')),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (!userId) {
+    if (!userId && !args.userId) {
       throw new Error('Not authenticated');
     }
 
@@ -95,7 +96,7 @@ export const addLink = mutation({
 
     const linkId = await ctx.db.insert('links', {
       ...args,
-      userId,
+      userId: userId || args.userId!,
     });
 
     const poolId = await scrapeWorkpool.enqueueAction(
@@ -104,7 +105,7 @@ export const addLink = mutation({
       {
         linkId,
         url: args.url,
-        userId,
+        userId: userId || args.userId!,
       },
     );
 

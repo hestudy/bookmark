@@ -15,3 +15,7 @@ export const searchIndexWorkpool = new Workpool(
     maxParallelism: 1,
   },
 );
+
+export const karakeepWorkpool = new Workpool(components.karakeepWorkpool, {
+  maxParallelism: 1,
+});
