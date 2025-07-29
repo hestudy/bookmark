@@ -19,17 +19,17 @@ const scrapy = new Hono()
     async (c) => {
       const validated = c.req.valid("json");
 
-      const browser = await puppeteer.connect({
-        browserWSEndpoint: process.env.BROWSERWSENDPOINT,
-      });
-      const page = await browser.newPage();
-      await page.goto(validated.url);
+      // const browser = await puppeteer.connect({
+      //   browserWSEndpoint: process.env.BROWSERWSENDPOINT,
+      // });
+      // const page = await browser.newPage();
+      // await page.goto(validated.url);
 
-      const html = await page.evaluate(() => {
-        return document.documentElement.outerHTML;
-      });
+      // const html = await page.evaluate(() => {
+      //   return document.documentElement.outerHTML;
+      // });
 
-      const dom = await new JSDOM(html);
+      const dom = await JSDOM.fromURL(validated.url);
 
       const result = await Defuddle(dom, undefined, {
         separateMarkdown: true,

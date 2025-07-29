@@ -336,6 +336,33 @@ export const scrapyAllLink = mutation({
   },
 });
 
+export const scrapyNoTitleLink = mutation({
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error('Not authenticated');
+    }
+
+    const links = (
+      await ctx.db
+        .query('links')
+        .filter((q) => q.eq(q.field('userId'), userId))
+        .collect()
+    ).filter((d) => !d.title);
+
+    for await (const link of links) {
+      await scrapeWorkpool.enqueueMutation(
+        ctx,
+        internal.link.internalScrapyLink,
+        {
+          linkId: link._id,
+          userId,
+        },
+      );
+    }
+  },
+});
+
 export const getMoreLink = internalQuery({
   args: {
     linkIds: v.array(v.id('links')),
